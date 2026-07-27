@@ -1555,7 +1555,16 @@ class Req(ReqDllmMixin):
         # to ensure shape consistency in KV cache.
         if self.input_embeds is not None:
             self.output_ids = array("q")
-            self.weight_version_events.clear()
+            self.weight_version_events = [
+                WeightVersionEvent(
+                    old_version=event.old_version,
+                    num_output_tokens=min(
+                        event.num_output_tokens, self.send_token_offset
+                    ),
+                )
+                for event in self.weight_version_events
+                if min(event.num_output_tokens, self.send_token_offset) > 0
+            ]
 
     def offload_kv_cache(self, req_to_token_pool, token_to_kv_pool_allocator):
         token_indices = req_to_token_pool.req_to_token[
