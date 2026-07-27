@@ -2458,13 +2458,13 @@ class Scheduler(
             and req.priority is not None
             and self.abort_on_priority_when_disabled
         ):
-            abort_req = AbortReq(
+            abort_req = _make_abort_req(
+                req,
                 finished_reason={
                     "type": "abort",
                     "status_code": HTTPStatus.SERVICE_UNAVAILABLE,
                     "message": "Using priority is disabled for this server. Please send a new request without a priority.",
                 },
-                rid=req.rid,
             )
             req.time_stats.trace_ctx.abort(abort_info=abort_req.finished_reason)
             self.ipc_channels.send_to_tokenizer.send_output(abort_req, req)
