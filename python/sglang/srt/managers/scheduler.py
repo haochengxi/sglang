@@ -4079,6 +4079,10 @@ class Scheduler(
             *self.waiting_queue,
             *([self.chunked_req] if self.chunked_req is not None else []),
         }
+        if self.hisparse_coordinator is not None:
+            live_reqs.update(
+                act.req for act in self.hisparse_coordinator.ack_staging_queue
+            )
         num_recorded = record_weight_version_events(live_reqs, old_version=old_version)
         logger.info(
             f"Weight version changed. {old_version=} {new_version=} {num_recorded=}"
